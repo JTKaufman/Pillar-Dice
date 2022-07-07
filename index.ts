@@ -2,6 +2,7 @@ import DiscordJS, { Intents } from 'discord.js'
 import random from 'lodash.random'
 import parse from 'csv-parse'
 import dotenv from 'dotenv'
+import { item, itemParse } from './Types'
 dotenv.config()
 
 // const parser = parse({columns: true}, function (err, records) {
@@ -23,41 +24,35 @@ client.on('ready', () => {
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
-
-    //Roll Command; Rolls a D20
-    if (message.content === '/roll') {
-        console.log(message.content)
-        message.channel.send({
-            content: 'You rolled: ' + random(1, 20),
-        })
-        return;
-    }
-
-    if (message.content === 'Hello world!') {
-        message.channel.send({
-            content: 'Hello world!',
-        })
-        return;
-    }
-
     const file = message.attachments.first()?.url
     if (!file) return console.log('No attached file found!')
 
     try {
         message.channel.send('Reading the file! Fetching data...')
-
         const response = await fetch(file)
 
-        //Find a way to check response this gives an overload error
+        //Checks to make sure there is a response and that it includes the correct file
+        if(!response || !response.url.includes('bag_of_holding.csv')) {
+            console.log('No response or the wrong attachment was found.')
+            return;
+        } else {
+            message.channel.send('updating items in the bag of holding...')
+            const text = await response.text();
 
-        const text = await response.text();
+            console.log(text)
 
-        console.log(text)
+            let itemList = text.split("\n")
+            
 
-        if (text) {
-            message.channel.send(`\`\`\`${text}\`\`\``)
+            itemList.slice(1).forEach(items => {
+                if (items) {
+                    let item1 = itemParse(items.split(','))
+                    message.channel.send(`\`\`\`${item1}\`\`\``)
+                    console.log(item1)
+                }
+            });
+
         }
-
       } catch (error) {
         console.log(error);
       }
