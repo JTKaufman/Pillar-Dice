@@ -19,27 +19,7 @@ client.on('ready', () => {
     console.log('Pillar bot online!')
 })
 
-function addToBagOfHolding():void {
-    //Deletes the previous message to hide the new bagOfHolding contents and then updates the items in the bagOfHolding
-    message.delete()
-    message.channel.send('updating items in the bag of holding...')
-
-    //Breaks the file contents of the bag_of_holding.csv into an array
-    const text = await response.text();
-    let itemList = text.split("\n")
-        
-    //Pushes each set of good and bad items into the bagOfHolding array
-    itemList.slice(1).forEach(items => {
-    if (items) {
-            let item1 = itemParse(items.split(','))
-            if (typeof item1 === 'undefined') {
-                return
-                }
-            bagOfHolding.push(item1)
-        }
-    });
-}
-
+//
 client.on('messageCreate', async (message) => {
     //Returns if the message was sent by a bot
     if (message.author.bot) return;
@@ -58,6 +38,29 @@ client.on('messageCreate', async (message) => {
             console.log('No response or the wrong attachment was found.')
             return;
         } else {
+            //Deletes the previous message to hide the new bagOfHolding contents and then updates the items in the bagOfHolding
+            message.delete()
+            message.channel.send('updating items in the bag of holding...')
+
+            //Breaks the file contents of the bag_of_holding.csv into an array
+            const text = await response.text();
+            let itemList = text.split("\n")
+            
+            //Pushes each set of good and bad items into the bagOfHolding array
+            itemList.slice(1).forEach(items => {
+                if (items) {
+                    let item1 = itemParse(items.split(','))
+                    if (typeof item1 === 'undefined') {
+                        return
+                    }
+                    bagOfHolding.push(item1)
+                }
+            });
+
+            bagOfHolding.forEach((i: any) => {
+                console.log(i)
+                message.channel.send(`\`\`\`${i.goodItemName}\`\`\``)
+            })
 
         }
       } catch (error) {
