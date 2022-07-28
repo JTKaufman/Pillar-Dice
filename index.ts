@@ -1,4 +1,4 @@
-import DiscordJS, { Intents } from 'discord.js'
+import DiscordJS, { Intents, Interaction } from 'discord.js'
 import random from 'lodash.random'
 import parse from 'csv-parse'
 import dotenv from 'dotenv'
@@ -17,6 +17,35 @@ const client = new DiscordJS.Client({
 
 client.on('ready', () => {
     console.log('Pillar bot online!')
+
+    //Establishes commands available in discord server
+    const guildId = typeof process.env.GUILDID
+    const guild = client.guilds.cache.get(guildId)
+    let commands;
+
+    if(guild) {
+         commands = guild.commands
+    } else {
+        commands = client.application?.commands
+    }
+
+    //Adds '/roll' as a command
+    commands?.create({
+        name: 'roll',
+        description: 'Rolls a D20',
+    })
+})
+
+//Checks the command used and executes a function based on what command was invoked
+client.on('interactionCreate', interaction => {
+    if (!interaction.isCommand()) return;
+    const { commandName } = interaction
+    console.log(commandName)
+    if(commandName === 'roll') {
+        interaction.reply({
+            content: 'You rolled: ' + random(1, 20),
+        })
+    }
 })
 
 //
