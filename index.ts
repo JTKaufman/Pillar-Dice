@@ -2,11 +2,10 @@ import DiscordJS, { Intents } from 'discord.js'
 import random from 'lodash.random'
 import parse from 'csv-parse'
 import dotenv from 'dotenv'
+import { item, itemParse } from './Types'
 dotenv.config()
 
-// const parser = parse({columns: true}, function (err, records) {
-//     console.log(records)
-// })
+let bagOfHolding:item[] = [];
 
 const client = new DiscordJS.Client({
     intents: [
@@ -20,44 +19,50 @@ client.on('ready', () => {
     console.log('Pillar bot online!')
 })
 
+//
 client.on('messageCreate', async (message) => {
+    //Returns if the message was sent by a bot
     if (message.author.bot) return;
 
-
-    //Roll Command; Rolls a D20
-    if (message.content === '/roll') {
-        console.log(message.content)
-        message.channel.send({
-            content: 'You rolled: ' + random(1, 20),
-        })
-        return;
-    }
-
-    if (message.content === 'Hello world!') {
-        message.channel.send({
-            content: 'Hello world!',
-        })
-        return;
-    }
-
+    //Checks message for attachment and returns if there is no attachments
     const file = message.attachments.first()?.url
     if (!file) return console.log('No attached file found!')
 
     try {
         message.channel.send('Reading the file! Fetching data...')
-
         const response = await fetch(file)
 
-        //Find a way to check response this gives an overload error
+        //Checks to make sure there is a response and that it includes the correct file to only update the bagOfHolding
+        if(!response || !response.url.includes('bag_of_holding.csv')) {
+            //Returns if this is not a bagOfHolding update
+            console.log('No response or the wrong attachment was found.')
+            return;
+        } else {
+            //Deletes the previous message to hide the new bagOfHolding contents and then updates the items in the bagOfHolding
+            message.delete()
+            message.channel.send('updating items in the bag of holding...')
 
-        const text = await response.text();
+            //Breaks the file contents of the bag_of_holding.csv into an array
+            const text = await response.text();
+            let itemList = text.split("\n")
+            
+            //Pushes each set of good and bad items into the bagOfHolding array
+            itemList.slice(1).forEach(items => {
+                if (items) {
+                    let item1 = itemParse(items.split(','))
+                    if (typeof item1 === 'undefined') {
+                        return
+                    }
+                    bagOfHolding.push(item1)
+                }
+            });
 
-        console.log(text)
+            bagOfHolding.forEach((i: any) => {
+                console.log(i)
+                message.channel.send(`\`\`\`${i.goodItemName}\`\`\``)
+            })
 
-        if (text) {
-            message.channel.send(`\`\`\`${text}\`\`\``)
         }
-
       } catch (error) {
         console.log(error);
       }
