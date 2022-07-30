@@ -34,17 +34,65 @@ client.on('ready', () => {
         name: 'roll',
         description: 'Rolls a D20',
     })
+
+    //Adds '/getanitem' as a command
+    commands?.create({
+        name: 'getanitem',
+        description: 'Pulls an item from the bag of holding',
+    })
 })
+
+function getAnItem() {
+    let itemRoll = random(1,20)
+    
+    if (bagOfHolding.some(item => item.pulled === false)) {
+        //Gets a random row from the bagOfHolding array to choose a good or bad item from that has not been pulled
+        let itemIndex = random(0, bagOfHolding.length - 1)
+        while (bagOfHolding[itemIndex].pulled === true) {
+            itemIndex = random(0, bagOfHolding.length - 1)
+        } 
+
+        //Marks the item row as pulled so it is not pulled again
+        bagOfHolding[itemIndex].pulled = true
+        
+        //Returns the good Item on a roll > 10 and Bad item on rolls <= 10
+        if (itemRoll > 10) {
+            return [bagOfHolding[itemIndex].goodItemName, bagOfHolding[itemIndex].goodItemDescription]
+        } else {
+            return [bagOfHolding[itemIndex].badItemName, bagOfHolding[itemIndex].badItemDescription]
+        }
+
+    } else {
+        return
+    }
+}
 
 //Checks the command used and executes a function based on what command was invoked
 client.on('interactionCreate', interaction => {
     if (!interaction.isCommand()) return;
     const { commandName } = interaction
     console.log(commandName)
+
+    //Messages channel with players roll between 1-20
     if(commandName === 'roll') {
         interaction.reply({
             content: 'You rolled: ' + random(1, 20),
         })
+    }
+
+    //Messages channel with the item pulled unless all items have been pulled
+    if(commandName === 'getanitem') {
+        let itemPulled = getAnItem()
+        if (itemPulled != null) {
+            interaction.reply({
+                content: 'You got ' + itemPulled[0] + '! This item has the following properties: ' + itemPulled[1],
+
+            })
+        } else {
+            interaction.reply({
+                content: 'There are no more items to pull from the bag of holding.',
+            })
+        }
     }
 })
 
@@ -88,8 +136,9 @@ client.on('messageCreate', async (message) => {
 
             bagOfHolding.forEach((i: any) => {
                 console.log(i)
-                message.channel.send(`\`\`\`${i.goodItemName}\`\`\``)
             })
+
+            message.channel.send('The bag of holding has been updated with the new items.')
 
         }
       } catch (error) {
