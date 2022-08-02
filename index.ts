@@ -40,6 +40,12 @@ client.on('ready', () => {
         name: 'getanitem',
         description: 'Pulls an item from the bag of holding',
     })
+
+    //Adds '/newgame' as a command
+    commands?.create({
+        name: 'newgame',
+        description: 'Resets the pulls in the Bag of Holding to start a new game with the same items',
+    })
 })
 
 function getAnItem() {
@@ -77,6 +83,19 @@ client.on('interactionCreate', interaction => {
     if(commandName === 'roll') {
         interaction.reply({
             content: 'You rolled: ' + random(1, 20),
+        })
+    }
+
+    //Resets the pulled property of each item in the bag of holding array
+    //Then messages channel to notify the players the bag of holding is ready for a new game
+    if(commandName === 'newgame') {
+        
+        bagOfHolding.forEach((item: any) => {
+            item.pulled = false
+        })
+
+        interaction.reply({
+            content: 'The bag of holding has been reset and is now ready for a new game',
         })
     }
 
