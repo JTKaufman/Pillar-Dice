@@ -40,6 +40,12 @@ client.on('ready', () => {
         name: 'getanitem',
         description: 'Pulls an item from the bag of holding',
     })
+
+    //Adds '/emptybagofholding' as a command
+    commands?.create({
+        name: 'emptybagofholding',
+        description: 'Removes all items from the bag of holding',
+    })
 })
 
 function getAnItem() {
@@ -93,6 +99,16 @@ client.on('interactionCreate', interaction => {
                 content: 'There are no more items to pull from the bag of holding.',
             })
         }
+    }
+
+    //Empties the bag of holding array and notifies discord channel
+    if(commandName === 'emptybagofholding') {
+        
+        bagOfHolding.length = 0
+
+        interaction.reply({
+            content: 'The bag of holding has been emptied.',
+        })
     }
 })
 
