@@ -88,6 +88,14 @@ client.on('interactionCreate', interaction => {
 
     //Messages channel with the item pulled unless all items have been pulled
     if(commandName === 'getanitem') {
+
+        if (bagOfHolding.length === 0) {
+            interaction.reply({
+                content: 'The bag of holding is empty. There are no items to pull.',
+
+            })
+        }
+
         let itemPulled = getAnItem()
         if (itemPulled != null) {
             interaction.reply({
