@@ -46,6 +46,12 @@ client.on('ready', () => {
         name: 'newgame',
         description: 'Resets the pulls in the Bag of Holding to start a new game with the same items',
     })
+    
+    //Adds '/emptybagofholding' as a command
+    commands?.create({
+        name: 'emptybagofholding',
+        description: 'Removes all items from the bag of holding',
+    })
 })
 
 function getAnItem() {
@@ -101,6 +107,14 @@ client.on('interactionCreate', interaction => {
 
     //Messages channel with the item pulled unless all items have been pulled
     if(commandName === 'getanitem') {
+
+        if (bagOfHolding.length === 0) {
+            interaction.reply({
+                content: 'The bag of holding is empty. There are no items to pull.',
+
+            })
+        }
+
         let itemPulled = getAnItem()
         if (itemPulled != null) {
             interaction.reply({
@@ -112,6 +126,16 @@ client.on('interactionCreate', interaction => {
                 content: 'There are no more items to pull from the bag of holding.',
             })
         }
+    }
+
+    //Empties the bag of holding array and notifies discord channel
+    if(commandName === 'emptybagofholding') {
+        
+        bagOfHolding.length = 0
+
+        interaction.reply({
+            content: 'The bag of holding has been emptied.',
+        })
     }
 })
 
