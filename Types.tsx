@@ -23,3 +23,11 @@ export function itemParse(itemArray: string[]) {
 
     return item
 }
+
+export type Language = {
+    Strings: LanguageStrings
+}
+
+export type LanguageStrings = {
+    [key: string]: string;
+}

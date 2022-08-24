@@ -1,8 +1,9 @@
 import DiscordJS, { Intents, Interaction } from 'discord.js'
 import random from 'lodash.random'
-import parse from 'csv-parse'
 import dotenv from 'dotenv'
 import { item, itemParse } from './Types'
+import { EN } from './utils/strings'
+import { getAnItemReply } from './utils/Utils'
 dotenv.config()
 
 let bagOfHolding:item[] = [];
@@ -16,7 +17,7 @@ const client = new DiscordJS.Client({
 })
 
 client.on('ready', () => {
-    console.log('Pillar bot online!')
+    console.log(EN.Strings.bot_online)
 
     //Establishes commands available in discord server
     const guildId = typeof process.env.GUILDID
@@ -31,26 +32,26 @@ client.on('ready', () => {
 
     //Adds '/roll' as a command
     commands?.create({
-        name: 'roll',
-        description: 'Rolls a D20',
+        name: EN.Strings.Command_name_roll,
+        description: EN.Strings.command_description_roll,
     })
 
     //Adds '/getanitem' as a command
     commands?.create({
-        name: 'getanitem',
-        description: 'Pulls an item from the bag of holding',
+        name: EN.Strings.command_name_getanitem,
+        description: EN.Strings.command_description_getanitem,
     })
 
     //Adds '/newgame' as a command
     commands?.create({
-        name: 'newgame',
-        description: 'Resets the pulls in the Bag of Holding to start a new game with the same items',
+        name: EN.Strings.command_name_newgame,
+        description: EN.Strings.command_description_newgame,
     })
     
     //Adds '/emptybagofholding' as a command
     commands?.create({
-        name: 'emptybagofholding',
-        description: 'Removes all items from the bag of holding',
+        name: EN.Strings.command_name_emptybagofholding,
+        description: EN.Strings.command_description_emptybagofholding,
     })
 })
 
@@ -86,55 +87,60 @@ client.on('interactionCreate', interaction => {
     console.log(commandName)
 
     //Messages channel with players roll between 1-20
-    if(commandName === 'roll') {
+    if(commandName === EN.Strings.Command_name_roll) {
         interaction.reply({
-            content: 'You rolled: ' + random(1, 20),
+            content: EN.Strings.command_reply_roll + random(1, 20),
         })
     }
 
     //Resets the pulled property of each item in the bag of holding array
     //Then messages channel to notify the players the bag of holding is ready for a new game
-    if(commandName === 'newgame') {
+    if(commandName === EN.Strings.command_name_newgame) {
         
-        bagOfHolding.forEach((item: any) => {
-            item.pulled = false
-        })
+        if (bagOfHolding.length === 0) {
+            interaction.reply({
+                content: EN.Strings.command_reply_getanitem_empty,
 
-        interaction.reply({
-            content: 'The bag of holding has been reset and is now ready for a new game',
-        })
+            })
+        } else {
+
+            bagOfHolding.forEach((item: any) => {
+                item.pulled = false
+            })
+
+            interaction.reply({
+                content: EN.Strings.command_reply_newgame,
+            })
+        }
     }
 
     //Messages channel with the item pulled unless all items have been pulled
-    if(commandName === 'getanitem') {
+    if(commandName === EN.Strings.command_name_getanitem) {
+        let itemPulled = getAnItem()
 
         if (bagOfHolding.length === 0) {
             interaction.reply({
-                content: 'The bag of holding is empty. There are no items to pull.',
-
+                content: EN.Strings.command_reply_getanitem_empty,
             })
-        }
-
-        let itemPulled = getAnItem()
-        if (itemPulled != null) {
+        } else if (itemPulled != null) {
             interaction.reply({
-                content: 'You got ' + itemPulled[0] + '! This item has the following properties: ' + itemPulled[1],
+                content: getAnItemReply(itemPulled),
 
             })
         } else {
             interaction.reply({
-                content: 'There are no more items to pull from the bag of holding.',
+                content: EN.Strings.command_reply_getanitem_empty,
             })
         }
     }
 
     //Empties the bag of holding array and notifies discord channel
-    if(commandName === 'emptybagofholding') {
+    if(commandName === EN.Strings.command_name_emptybagofholding) {
         
         bagOfHolding.length = 0
 
         interaction.reply({
-            content: 'The bag of holding has been emptied.',
+            content: EN.Strings.command_reply_emptybagofholding,
         })
     }
 })
@@ -146,21 +152,21 @@ client.on('messageCreate', async (message) => {
 
     //Checks message for attachment and returns if there is no attachments
     const file = message.attachments.first()?.url
-    if (!file) return console.log('No attached file found!')
+    if (!file) return console.log(EN.Strings.no_file_found)
 
     try {
-        message.channel.send('Reading the file! Fetching data...')
+        message.channel.send(EN.Strings.reading_file)
         const response = await fetch(file)
 
         //Checks to make sure there is a response and that it includes the correct file to only update the bagOfHolding
         if(!response || !response.url.includes('bag_of_holding.csv')) {
             //Returns if this is not a bagOfHolding update
-            console.log('No response or the wrong attachment was found.')
+            console.log(EN.Strings.wrong_attachment)
             return;
         } else {
             //Deletes the previous message to hide the new bagOfHolding contents and then updates the items in the bagOfHolding
             message.delete()
-            message.channel.send('updating items in the bag of holding...')
+            message.channel.send(EN.Strings.updating_bag_of_holding)
 
             //Breaks the file contents of the bag_of_holding.csv into an array
             const text = await response.text();
@@ -181,7 +187,7 @@ client.on('messageCreate', async (message) => {
                 console.log(i)
             })
 
-            message.channel.send('The bag of holding has been updated with the new items.')
+            message.channel.send(EN.Strings.updated_bag_of_holding)
 
         }
       } catch (error) {
