@@ -4,9 +4,14 @@ import dotenv from 'dotenv'
 import { item, itemParse } from './Types'
 import { EN } from './utils/strings'
 import { getAnItemReply } from './utils/Utils'
+import {createRollCommand, getRollReply} from './commands/roll'
+import { createGetAnItemCommand } from './commands/getanitem'
+import { createNewGameCommand, getNewGameReply } from './commands/newgame'
+import { createEmptyBagOfHoldingCommand, getEmptyBagOfHoldingReply } from './commands/emptybagofholding'
 dotenv.config()
 
-let bagOfHolding:item[] = [];
+export let bagOfHolding:item[] = [];
+
 
 const client = new DiscordJS.Client({
     intents: [
@@ -30,55 +35,13 @@ client.on('ready', () => {
         commands = client.application?.commands
     }
 
-    //Adds '/roll' as a command
-    commands?.create({
-        name: EN.Strings.Command_name_roll,
-        description: EN.Strings.command_description_roll,
-    })
-
-    //Adds '/getanitem' as a command
-    commands?.create({
-        name: EN.Strings.command_name_getanitem,
-        description: EN.Strings.command_description_getanitem,
-    })
-
-    //Adds '/newgame' as a command
-    commands?.create({
-        name: EN.Strings.command_name_newgame,
-        description: EN.Strings.command_description_newgame,
-    })
-    
-    //Adds '/emptybagofholding' as a command
-    commands?.create({
-        name: EN.Strings.command_name_emptybagofholding,
-        description: EN.Strings.command_description_emptybagofholding,
-    })
+    createRollCommand(commands)
+    createGetAnItemCommand(commands)
+    createNewGameCommand(commands)
+    createEmptyBagOfHoldingCommand(commands)
 })
 
-function getAnItem() {
-    let itemRoll = random(1,20)
-    
-    if (bagOfHolding.some(item => item.pulled === false)) {
-        //Gets a random row from the bagOfHolding array to choose a good or bad item from that has not been pulled
-        let itemIndex = random(0, bagOfHolding.length - 1)
-        while (bagOfHolding[itemIndex].pulled === true) {
-            itemIndex = random(0, bagOfHolding.length - 1)
-        } 
 
-        //Marks the item row as pulled so it is not pulled again
-        bagOfHolding[itemIndex].pulled = true
-        
-        //Returns the good Item on a roll > 10 and Bad item on rolls <= 10
-        if (itemRoll > 10) {
-            return [bagOfHolding[itemIndex].goodItemName, bagOfHolding[itemIndex].goodItemDescription]
-        } else {
-            return [bagOfHolding[itemIndex].badItemName, bagOfHolding[itemIndex].badItemDescription]
-        }
-
-    } else {
-        return
-    }
-}
 
 //Checks the command used and executes a function based on what command was invoked
 client.on('interactionCreate', interaction => {
@@ -86,62 +49,11 @@ client.on('interactionCreate', interaction => {
     const { commandName } = interaction
     console.log(commandName)
 
-    //Messages channel with players roll between 1-20
-    if(commandName === EN.Strings.Command_name_roll) {
-        interaction.reply({
-            content: EN.Strings.command_reply_roll + random(1, 20),
-        })
-    }
-
-    //Resets the pulled property of each item in the bag of holding array
-    //Then messages channel to notify the players the bag of holding is ready for a new game
-    if(commandName === EN.Strings.command_name_newgame) {
-        
-        if (bagOfHolding.length === 0) {
-            interaction.reply({
-                content: EN.Strings.command_reply_getanitem_empty,
-
-            })
-        } else {
-
-            bagOfHolding.forEach((item: any) => {
-                item.pulled = false
-            })
-
-            interaction.reply({
-                content: EN.Strings.command_reply_newgame,
-            })
-        }
-    }
-
-    //Messages channel with the item pulled unless all items have been pulled
-    if(commandName === EN.Strings.command_name_getanitem) {
-        let itemPulled = getAnItem()
-
-        if (bagOfHolding.length === 0) {
-            interaction.reply({
-                content: EN.Strings.command_reply_getanitem_empty,
-            })
-        } else if (itemPulled != null) {
-            interaction.reply({
-                content: getAnItemReply(itemPulled),
-
-            })
-        } else {
-            interaction.reply({
-                content: EN.Strings.command_reply_getanitem_empty,
-            })
-        }
-    }
-
-    //Empties the bag of holding array and notifies discord channel
-    if(commandName === EN.Strings.command_name_emptybagofholding) {
-        
-        bagOfHolding.length = 0
-
-        interaction.reply({
-            content: EN.Strings.command_reply_emptybagofholding,
-        })
+    switch(commandName) {
+        case EN.Strings.Command_name_roll: getRollReply(interaction);
+        case EN.Strings.command_name_newgame: getNewGameReply(interaction);
+        case EN.Strings.command_name_getanitem: getAnItemReply(interaction);
+        case EN.Strings.command_name_emptybagofholding: getEmptyBagOfHoldingReply(interaction);
     }
 })
 
