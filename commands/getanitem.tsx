@@ -1,4 +1,4 @@
-import { GuildApplicationCommandManager, ApplicationCommandManager, ApplicationCommand } from 'discord.js'
+import { GuildApplicationCommandManager, ApplicationCommandManager, ApplicationCommand, CacheType, CommandInteraction } from 'discord.js'
 import {EN} from '../utils/strings'
 import random from 'lodash.random'
 import { getAnItemReplyBuilder } from '../utils/Utils'
@@ -12,7 +12,7 @@ export function createGetAnItemCommand(commands: GuildApplicationCommandManager 
     })
 }
 
-export function getAnItemReply(interaction: { reply: (arg0: { content: string }) => void }) {
+export function getAnItemReply(interaction: CommandInteraction<CacheType>) {
     //Messages channel with the item pulled unless all items have been pulled
     let itemPulled = getAnItem()
 

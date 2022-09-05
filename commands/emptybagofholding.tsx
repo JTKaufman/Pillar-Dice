@@ -1,4 +1,4 @@
-import { GuildApplicationCommandManager, ApplicationCommandManager, ApplicationCommand } from 'discord.js'
+import { GuildApplicationCommandManager, ApplicationCommandManager, ApplicationCommand, CacheType, CommandInteraction } from 'discord.js'
 import {EN} from '../utils/strings'
 import { bagOfHolding } from '..'
 
@@ -10,7 +10,7 @@ export function createEmptyBagOfHoldingCommand(commands: GuildApplicationCommand
     })
 }
 
-export function getEmptyBagOfHoldingReply(interaction: { reply: (arg0: { content: string }) => void }) {
+export function getEmptyBagOfHoldingReply(interaction: CommandInteraction<CacheType>) {
     //Empties the bag of holding array and notifies discord channel
     emptyBagOfHolding()
 

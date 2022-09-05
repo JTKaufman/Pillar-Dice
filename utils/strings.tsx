@@ -20,5 +20,7 @@ export var EN:Language = {
         "command_name_emptybagofholding": 'emptybagofholding',
         "command_description_emptybagofholding": 'Removes all items from the bag of holding',
         "command_reply_emptybagofholding": 'The bag of holding has been emptied.',
+        "command_name_updatebagofholding": 'updatebagofholding',
+        "command_description_updatebagofholding": 'Adds the items from your attached csv file'
     }
 }

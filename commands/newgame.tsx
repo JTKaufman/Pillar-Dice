@@ -1,4 +1,4 @@
-import { GuildApplicationCommandManager, ApplicationCommandManager, ApplicationCommand } from 'discord.js'
+import { GuildApplicationCommandManager, ApplicationCommandManager, ApplicationCommand, CacheType, CommandInteraction } from 'discord.js'
 import {EN} from '../utils/strings'
 import { bagOfHolding } from '..'
 
@@ -10,7 +10,7 @@ export function createNewGameCommand(commands: GuildApplicationCommandManager | 
     })
 }
 
-export function getNewGameReply(interaction: { reply: (arg0: { content: string }) => void }) {
+export function getNewGameReply(interaction: CommandInteraction<CacheType>) {
     //Resets the pulled property of each item in the bag of holding array
     //Then messages channel to notify the players the bag of holding is ready for a new game
     if (bagOfHolding.length === 0) {
