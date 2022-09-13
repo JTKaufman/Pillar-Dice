@@ -21,6 +21,6 @@
     "@types/lodash.random": "^3.2.7"
   },
   "engines": {
-    "node": "18.4.0"
+    "node": "16.15.1"
   }
 }
