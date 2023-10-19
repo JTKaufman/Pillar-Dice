@@ -1,4 +1,4 @@
-//Creates the item type to be put into a list of items for the Get an item function
+//Creates the item type to be put into a list of items for the Get an item function test
 export type item = {
     goodItemName: string;
     goodItemDescription: string;
