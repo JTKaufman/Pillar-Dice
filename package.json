@@ -17,7 +17,8 @@
     "discord.js": "^13.8.0",
     "dotenv": "^16.0.1",
     "lodash.random": "^3.2.0",
-    "node-fetch": "^2.6.6"
+    "node-fetch": "^2.6.6",
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
     "@types/lodash.random": "^3.2.7"
